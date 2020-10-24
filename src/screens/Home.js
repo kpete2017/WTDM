@@ -1,24 +1,35 @@
 import * as React from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
-import { color } from 'react-native-reanimated';
+import { View, StyleSheet } from 'react-native';
+import MapView from 'react-native-maps';
+import customStyle from '../MapStyle'
 
 export default function Home({ navigation }) {
     return (
-      <View style={style.container}>
-        <Text style={style.text}>Home Screen</Text>
-        <Button title="Toggle drawer" onPress={() => navigation.toggleDrawer()} />
+      <View style={styles.container}>
+        <MapView
+            initialRegion={{
+              latitude: 37.78825,
+              longitude: -122.4324,
+              latitudeDelta: 0.0922,
+              longitudeDelta: 0.0421,
+            }}
+            customMapStyle={customStyle}
+            style={styles.map}
+          />
       </View>
     );
 }
 
-const style = StyleSheet.create({ 
+const styles = StyleSheet.create({ 
     container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
         backgroundColor: '#141418',
+        height: '100%'
     },
     text: {
         color: '#FFFFFF'
+    },
+    map: {
+      height: '40%',
+      width: '100%'
     }
 })

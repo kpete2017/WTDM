@@ -2,12 +2,10 @@ import * as React from 'react';
 import {
     createDrawerNavigator,
     DrawerContentScrollView,
-    DrawerItemList,
-    DrawerItem,
+    DrawerItemList
 } from '@react-navigation/drawer';
 import { View, Text, StyleSheet } from 'react-native';
 import Home from '../screens/Home'
-import { DarkTheme } from '@react-navigation/native';
   
 function Notifications() {
     return (
