@@ -15,6 +15,7 @@ export default function Home({ navigation }) {
             }}
             customMapStyle={customStyle}
             style={styles.map}
+            provider={MapView.PROVIDER_GOOGLE}
           />
       </View>
     );
@@ -29,7 +30,7 @@ const styles = StyleSheet.create({
         color: '#FFFFFF'
     },
     map: {
-      height: '40%',
+      height: '50%',
       width: '100%'
     }
 })
