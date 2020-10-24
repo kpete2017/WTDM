@@ -12,6 +12,7 @@ export default class Home extends Component {
     mapRegion: null,
     hasLocationPermissions: false,
     locationResult: null,
+    markers: [],
   };
 
   componentDidMount() {
@@ -53,30 +54,37 @@ export default class Home extends Component {
         <MapView
             showsUserLocation={true}
             showsCompass={true}
-            showsPointsOfInterest={true}
             showsMyLocationButton={true}
             customMapStyle={customStyle}
             style={this.styles.map}
             provider={MapView.PROVIDER_GOOGLE}
             region={this.state.mapRegion}
-          />
+          >
+            {this.state.markers.map((marker, index) => (
+              <Marker
+                key={index}
+                coordinate={marker.latlng}
+                title={marker.title}
+                description={marker.description}
+              />
+            ))}
+          </MapView>
           <Text style={this.styles.text}>Pick An Activity:</Text>
           <View style={this.styles.buttonContainer}>
             <TouchableOpacity style={this.styles.button}>
-              <Text style={this.styles.text}>Activity</Text>
+              <Text style={this.styles.text}>Dine In</Text>
             </TouchableOpacity >
             <TouchableOpacity style={this.styles.button}>
-              <Text style={this.styles.text}>Activity</Text>
+              <Text style={this.styles.text}>Fast Food</Text>
             </TouchableOpacity>
             <TouchableOpacity style={this.styles.button}>
-              <Text style={this.styles.text}>Activity</Text>
+              <Text style={this.styles.text}>Shopping</Text>
             </TouchableOpacity>
             <TouchableOpacity style={this.styles.button}>
-              <Text style={this.styles.text}>Activity</Text>
+              <Text style={this.styles.text}>Outdoor</Text>
             </TouchableOpacity>
           </View>
           <Text style={this.styles.text}>Choose a Search Result:</Text>
-
           <View style={this.styles.list}>
 
           </View>
@@ -91,7 +99,7 @@ export default class Home extends Component {
     },
     text: {
         color: '#FFFFFF',
-        padding: 15
+        padding: 12,
     },
     map: {
       height: '50%',
@@ -103,16 +111,18 @@ export default class Home extends Component {
       justifyContent: "space-between",
       alignSelf: 'center',
       width: '95%',
-      marginBottom: 10
+      marginBottom: 10    
     },
     button: {
       backgroundColor: "#23232e",
+      borderRadius: 5
     },
     list: {
       width: '95%',
       alignSelf: 'center',
       backgroundColor: '#23232e',
-      height: '24%'
+      height: '24%',
+      borderRadius: 5
     }
   })
 }
