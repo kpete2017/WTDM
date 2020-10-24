@@ -13,6 +13,8 @@ export default class Home extends Component {
     hasLocationPermissions: false,
     locationResult: null,
     markers: [],
+    key: 'AIzaSyDUVmxbFqyRttBl9ixHkugr6X1sigay2o0',
+    radius: '1500'
   };
 
   componentDidMount() {
@@ -24,16 +26,12 @@ export default class Home extends Component {
   };
 
   async getLocationAsync () {
-    // permissions returns only for location permissions on iOS and under certain conditions, see Permissions.LOCATION
     const { status } = await Permissions.askAsync(
       Permissions.LOCATION
     );
     if (status === 'granted') {
       this.setState({ hasLocationPermissions: true });
-      //  let location = await Location.getCurrentPositionAsync({ enableHighAccuracy: true });
       let location = await Location.getCurrentPositionAsync({});
-      this.setState({ locationResult: JSON.stringify(location) });
-      // Center the map on the location we just fetched.
       this.setState({
         mapRegion: {
           latitude: location.coords.latitude,
@@ -47,8 +45,25 @@ export default class Home extends Component {
     }
   };
 
+  handleDineInPress = () => {
+
+    const url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?";
+    const location = `location=${this.state.mapRegion["latitude"]},${this.state.mapRegion["longitude"]}`;
+    const radius = `&radius=${this.state.radius}`;
+    const type = "&type=restaurant";
+    const key = `&key=${this.state.key}`;
+
+
+    fetch(url + location + radius + type + key)
+      .then(response => response.json())
+      .then(result => {
+        const finalResults = result.results;
+        console.log(finalResults)
+      })
+  }
 
   render() {
+
     return (
       <View style={this.styles.container}>
         <MapView
@@ -58,20 +73,12 @@ export default class Home extends Component {
             customMapStyle={customStyle}
             style={this.styles.map}
             provider={MapView.PROVIDER_GOOGLE}
-            region={this.state.mapRegion}
+            initialRegion={this.state.mapRegion}
           >
-            {this.state.markers.map((marker, index) => (
-              <Marker
-                key={index}
-                coordinate={marker.latlng}
-                title={marker.title}
-                description={marker.description}
-              />
-            ))}
           </MapView>
           <Text style={this.styles.text}>Pick An Activity:</Text>
           <View style={this.styles.buttonContainer}>
-            <TouchableOpacity style={this.styles.button}>
+            <TouchableOpacity style={this.styles.button} onPress={() => this.handleDineInPress()}>
               <Text style={this.styles.text}>Dine In</Text>
             </TouchableOpacity >
             <TouchableOpacity style={this.styles.button}>
@@ -86,7 +93,9 @@ export default class Home extends Component {
           </View>
           <Text style={this.styles.text}>Choose a Search Result:</Text>
           <View style={this.styles.list}>
-
+            <TouchableOpacity>
+              <Text style={this.styles.text}>{`\u2022`} Click an Activity to see results</Text>
+            </TouchableOpacity>
           </View>
       </View>
     );
@@ -121,7 +130,6 @@ export default class Home extends Component {
       width: '95%',
       alignSelf: 'center',
       backgroundColor: '#23232e',
-      height: '24%',
       borderRadius: 5
     }
   })
