@@ -32,6 +32,9 @@ export default function MyDrawer() {
       <Drawer.Navigator 
       drawerContent={props => <CustomDrawerContent {...props} />}
       drawerStyle={style.drawer}
+      drawerContentOptions={{
+        inactiveTintColor: 'white',
+      }}
       >
         <Drawer.Screen name="Home" component={Home} />
         <Drawer.Screen name="Notifications" component={Notifications} />
@@ -41,7 +44,8 @@ export default function MyDrawer() {
 
 const style = StyleSheet.create({
     drawer: {
-        backgroundColor: '#151515',
+        backgroundColor: '#23232e',
+        width: "50%"
     },
     text: {
         color: '#FFFFFF'
