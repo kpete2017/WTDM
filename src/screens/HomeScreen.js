@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, FlatList } from 'react-native';
 import MapView from 'react-native-maps';
+import { Marker } from 'react-native-maps';
 import customStyle from '../MapStyle'
 import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
@@ -72,6 +73,13 @@ export default class Home extends Component {
             provider={MapView.PROVIDER_GOOGLE}
             initialRegion={this.state.mapRegion}
           >
+          {this.state.activities.map(activity => {
+            <Marker
+            title={activity['name']}
+            key={activity['index']}
+            coordinate={activity['geometry']['location']}
+            ></Marker>
+          })}
           </MapView>
           <Text style={this.styles.text}>Pick An Activity:</Text>
           <View style={this.styles.buttonContainer}>
@@ -93,7 +101,6 @@ export default class Home extends Component {
             <FlatList
               data={this.state.activities}
               renderItem={(activity) => {
-                console.log(activity['item']['name'])
                 return <Text style={this.styles.text}>{`\u2022`} {activity['item']['name']}</Text>
               }}
               keyExtractor={(activity) => activity['index']}
