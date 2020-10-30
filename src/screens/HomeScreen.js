@@ -14,7 +14,7 @@ export default class Home extends Component {
     hasLocationPermissions: false,
     locationResult: null,
     markers: [],
-    key: 'AIzaSyD1dmZKGlPaI3GxShhbfuKmXBiqZy7mH-U',
+    key: '',
     radius: '1500',
     activities: []
   };
