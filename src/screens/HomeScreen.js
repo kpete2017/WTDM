@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text, FlatList } from 'react-native';
 import MapView from 'react-native-maps';
 import customStyle from '../MapStyle'
 import * as Location from 'expo-location';
@@ -13,8 +13,9 @@ export default class Home extends Component {
     hasLocationPermissions: false,
     locationResult: null,
     markers: [],
-    key: '',
-    radius: '1500'
+    key: 'AIzaSyD1dmZKGlPaI3GxShhbfuKmXBiqZy7mH-U',
+    radius: '1500',
+    activities: []
   };
 
   componentDidMount() {
@@ -53,13 +54,9 @@ export default class Home extends Component {
     const type = "&type=restaurant";
     const key = `&key=${this.state.key}`;
 
-
     fetch(url + location + radius + type + key)
       .then(response => response.json())
-      .then(result => {
-        const finalResults = result.results;
-        console.log(finalResults)
-      })
+      .then(result => this.setState({ activities: result.results}))
   }
 
   render() {
@@ -93,9 +90,14 @@ export default class Home extends Component {
           </View>
           <Text style={this.styles.text}>Choose a Search Result:</Text>
           <View style={this.styles.list}>
-            <TouchableOpacity>
-              <Text style={this.styles.text}>{`\u2022`} Click an Activity to see results</Text>
-            </TouchableOpacity>
+            <FlatList
+              data={this.state.activities}
+              renderItem={(activity) => {
+                console.log(activity['item']['name'])
+                return <Text style={this.styles.text}>{`\u2022`} {activity['item']['name']}</Text>
+              }}
+              keyExtractor={(activity) => activity['index']}
+            />
           </View>
       </View>
     );
@@ -128,6 +130,7 @@ export default class Home extends Component {
     },
     list: {
       width: '95%',
+      height: '30%',
       alignSelf: 'center',
       backgroundColor: '#23232e',
       borderRadius: 5
