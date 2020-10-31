@@ -2,10 +2,9 @@ import React, { Component } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, FlatList } from 'react-native';
 import MapView from 'react-native-maps';
 import { Marker } from 'react-native-maps';
-import customStyle from '../MapStyle'
+import customStyle from '../MapStyle';
 import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
-
 
 export default class Home extends Component {
 
@@ -14,7 +13,7 @@ export default class Home extends Component {
     hasLocationPermissions: false,
     locationResult: null,
     markers: [],
-    key: 'AIzaSyD1dmZKGlPaI3GxShhbfuKmXBiqZy7mH-U',
+    key: '',
     radius: '1500',
     activities: []
   };
@@ -22,10 +21,6 @@ export default class Home extends Component {
   componentDidMount() {
     this.getLocationAsync();
   }
-
-  handleMapRegionChange = mapRegion => {
-    this.setState({ mapRegion });
-  };
 
   async getLocationAsync () {
     const { status } = await Permissions.askAsync(
@@ -38,8 +33,8 @@ export default class Home extends Component {
         mapRegion: {
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
+          latitudeDelta: 0.015,
+          longitudeDelta: 0.015,
         },
       });
     } else {
@@ -48,16 +43,15 @@ export default class Home extends Component {
   };
 
   handleDineInPress = () => {
-
     const url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?";
     const location = `location=${this.state.mapRegion["latitude"]},${this.state.mapRegion["longitude"]}`;
     const radius = `&radius=${this.state.radius}`;
     const type = "&type=restaurant";
     const key = `&key=${this.state.key}`;
-
     fetch(url + location + radius + type + key)
       .then(response => response.json())
-      .then(result => this.setState({ activities: result.results}))
+      .then(result => this.setState({ activities: result.results }))
+      .catch( e => console.log(e))
   }
 
   render() {
@@ -66,7 +60,6 @@ export default class Home extends Component {
       <View style={this.styles.container}>
         <MapView
             showsUserLocation={true}
-            showsCompass={true}
             showsMyLocationButton={true}
             customMapStyle={customStyle}
             style={this.styles.map}
@@ -74,10 +67,14 @@ export default class Home extends Component {
             initialRegion={this.state.mapRegion}
           >
           {this.state.activities.map(activity => {
-            <Marker
+            const LatLng = {
+              latitude: activity['geometry']['location']['lat'],
+              longitude: activity['geometry']['location']['lng']
+            }
+            return <Marker
             title={activity['name']}
-            key={activity['index']}
-            coordinate={activity['geometry']['location']}
+            key={activity['id']}
+            coordinate={LatLng}
             ></Marker>
           })}
           </MapView>
@@ -103,7 +100,7 @@ export default class Home extends Component {
               renderItem={(activity) => {
                 return <Text style={this.styles.text}>{`\u2022`} {activity['item']['name']}</Text>
               }}
-              keyExtractor={(activity) => activity['index']}
+              keyExtractor={(activity) => activity['id']}
             />
           </View>
       </View>

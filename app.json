@@ -21,6 +21,9 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "mysecret": "AIzaSyCTG8tfRBCabaCP-enskC2akmNVBvaOAAs"
     }
   }
 }
