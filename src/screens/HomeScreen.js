@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, FlatList } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text, ScrollView, Image } from 'react-native';
 import MapView from 'react-native-maps';
 import { Marker } from 'react-native-maps';
 import customStyle from '../MapStyle';
@@ -12,10 +12,12 @@ export default class Home extends Component {
     mapRegion: null,
     hasLocationPermissions: false,
     locationResult: null,
-    markers: [],
     key: '',
-    radius: '1500',
-    activities: []
+    radius: '2500',
+    activities: [],
+    isActivityChosen: false,
+    chosenActivity: [],
+    markers: [],
   };
 
   componentDidMount() {
@@ -43,21 +45,48 @@ export default class Home extends Component {
   };
 
   handleDineInPress = () => {
-    const url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?";
+    const url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?';
     const location = `location=${this.state.mapRegion["latitude"]},${this.state.mapRegion["longitude"]}`;
     const radius = `&radius=${this.state.radius}`;
     const type = "&type=restaurant";
     const key = `&key=${this.state.key}`;
-    fetch(url + location + radius + type + key)
+    const dineInUrl = url + location + radius + type + key;
+    fetch(dineInUrl)
       .then(response => response.json())
-      .then(result => this.setState({ activities: result.results }))
+      .then(result => this.setState({ activities: result.results, markers: result.results }))
       .catch( e => console.log(e))
   }
 
-  render() {
+  handleActivityPress = (activity) => {
+    this.setState({
+      mapRegion: {
+        latitude: activity['geometry']['location']['lat'],
+        longitude: activity['geometry']['location']['lng']  - .0045,
+        latitudeDelta: 0.015,
+        longitudeDelta: 0.015
+      },
+      isActivityChosen: true,
+      markers: [activity],
+      chosenActivity: activity
+    })
+    this.scroll.scrollTo({x: 0, y: 0, animated: true})
+  }
 
+  handleRandomPress = () => {
+    if(this.state.activities.length > 0) {
+      let randomNumberPick = Math.round(Math.random() * this.state.activities.length);
+      this.handleActivityPress(this.state.activities[randomNumberPick - 1]);
+    } else {
+      alert("Please select an activity first")
+    }
+  }
+
+  render() {
     return (
-      <View style={this.styles.container}>
+      <ScrollView 
+      style={this.styles.container}
+      ref={(c) => {this.scroll = c}}
+      >
         <MapView
             showsUserLocation={true}
             showsMyLocationButton={true}
@@ -65,19 +94,30 @@ export default class Home extends Component {
             style={this.styles.map}
             provider={MapView.PROVIDER_GOOGLE}
             initialRegion={this.state.mapRegion}
+            region={this.state.mapRegion}
+            animated={true}
           >
-          {this.state.activities.map(activity => {
+          {this.state.markers.map(activity => {
             const LatLng = {
               latitude: activity['geometry']['location']['lat'],
               longitude: activity['geometry']['location']['lng']
-            }
+            };
             return <Marker
             title={activity['name']}
-            key={activity['id']}
+            key={activity['place_id']}
             coordinate={LatLng}
+            icon={activity['icon']}
             ></Marker>
           })}
           </MapView>
+          {this.state.isActivityChosen ? 
+          <ScrollView style={this.styles.activityContainer}>
+            <Text style={this.styles.text}>{this.state.chosenActivity['name']}</Text>
+
+          </ScrollView> 
+          : 
+          null
+          }
           <Text style={this.styles.text}>Pick An Activity:</Text>
           <View style={this.styles.buttonContainer}>
             <TouchableOpacity style={this.styles.button} onPress={() => this.handleDineInPress()}>
@@ -93,51 +133,72 @@ export default class Home extends Component {
               <Text style={this.styles.text}>Outdoor</Text>
             </TouchableOpacity>
           </View>
+          <TouchableOpacity style={this.styles.randomButton} onPress={() => this.handleRandomPress()}>
+            <Text style={this.styles.text}>Choose Random</Text>
+          </TouchableOpacity>
           <Text style={this.styles.text}>Choose a Search Result:</Text>
           <View style={this.styles.list}>
-            <FlatList
-              data={this.state.activities}
-              renderItem={(activity) => {
-                return <Text style={this.styles.text}>{`\u2022`} {activity['item']['name']}</Text>
-              }}
-              keyExtractor={(activity) => activity['id']}
-            />
+            {this.state.activities.map(activity => {
+              return <TouchableOpacity onPress={() => this.handleActivityPress(activity)}>
+                <Text style={this.styles.text} key={activity['place_id']}>{`\u2022`} {activity['name']}</Text>
+              </TouchableOpacity>
+            })}
           </View>
-      </View>
+      </ScrollView>
     );
   }
 
   styles = StyleSheet.create({ 
     container: {
         backgroundColor: '#141418',
-        height: '100%'
+        height: 'auto'
     },
     text: {
         color: '#FFFFFF',
+        fontSize: 15,
         padding: 12,
+        fontWeight: "700"
     },
     map: {
-      height: '50%',
-      width: '100%'
+      height: 450,
+      width: '100%',
+      zIndex: -1
     },
     buttonContainer: {
       display: 'flex',
       flexDirection: 'row',
-      justifyContent: "space-between",
+      justifyContent: 'space-between',
       alignSelf: 'center',
       width: '95%',
       marginBottom: 10    
     },
     button: {
-      backgroundColor: "#23232e",
+      backgroundColor: '#23232e',
       borderRadius: 5
     },
     list: {
       width: '95%',
-      height: '30%',
+      height: 'auto',
       alignSelf: 'center',
       backgroundColor: '#23232e',
-      borderRadius: 5
+      borderRadius: 5,
+      marginBottom: 10
+    },
+    randomButton: {
+      backgroundColor: '#23232e',
+      width: '95%',
+      alignSelf: 'center',
+      alignItems: 'center',
+      borderRadius: 5,
+    },
+    activityContainer: {
+      backgroundColor: '#23232e',
+      width: '50%',
+      height: 430,
+      zIndex: 1,
+      position: 'absolute',
+      top: 10,
+      left: 5
     }
   })
 }
