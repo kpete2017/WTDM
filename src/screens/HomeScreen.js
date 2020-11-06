@@ -6,6 +6,9 @@ import customStyle from '../MapStyle';
 import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
 
+const url  = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?'
+
+
 export default class Home extends Component {
 
   state = {
@@ -26,7 +29,7 @@ export default class Home extends Component {
   }
 
   async getLocationAsync () {
-    this.setState({isLoading: true})
+    this.setState({ isLoading: true})
     const { status } = await Permissions.askAsync(
       Permissions.LOCATION
     );
@@ -51,15 +54,54 @@ export default class Home extends Component {
 
   handleDineInPress = () => {
     this.setState({isLoading: true})
-    const url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?';
     const location = `location=${this.state.mapRegion['latitude']},${this.state.mapRegion['longitude']}`;
     const radius = `&radius=${this.state.radius}`;
-    const type = "&type=restaurant";
+    const type = '&keyword=restaurant';
     const key = `&key=${this.state.key}`;
     const dineInUrl = url + location + radius + type + key;
-    fetch(dineInUrl)
+    this.fetchUrl(dineInUrl)
+  }
+
+  handleFastFoodPress = () => {
+    this.setState({isLoading: true})
+    const location = `location=${this.state.mapRegion['latitude']},${this.state.mapRegion['longitude']}`;
+    const radius = `&radius=${this.state.radius}`;
+    const type = '&keyword=fast%20food';
+    const key = `&key=${this.state.key}`;
+    const fastFoodUrl = url + location + radius + type  + key;
+    this.fetchUrl(fastFoodUrl);
+  }
+
+  handleShoppingPress = () => {
+    this.setState({isLoading: true})
+    const location = `location=${this.state.mapRegion['latitude']},${this.state.mapRegion['longitude']}`;
+    const radius = `&radius=${this.state.radius}`;
+    const type = '&keyword=clothing%20store';
+    const key = `&key=${this.state.key}`;
+    const shoppingUrl = url + location + radius + type  + key;
+    this.fetchUrl(shoppingUrl);
+  }
+
+  handleOutdoorPress = () => {
+    this.setState({isLoading: true})
+    const location = `location=${this.state.mapRegion['latitude']},${this.state.mapRegion['longitude']}`;
+    const radius = `&radius=${this.state.radius}`;
+    const type = '&keyword=park';
+    const key = `&key=${this.state.key}`;
+    const fastFoodUrl = url + location + radius + type  + key;
+    this.fetchUrl(fastFoodUrl);
+  }
+
+  fetchUrl = (url) => {
+    fetch(url)
       .then(response => response.json())
-      .then(result => this.setState({ activities: result.results, markers: result.results, isLoading: false }))
+      .then(result => 
+        this.setState({ 
+        activities: result.results, 
+        markers: result.results, 
+        isLoading: false, 
+        chosenActivity: [] })
+      )
       .catch( e => console.log(e))
   }
 
@@ -81,9 +123,13 @@ export default class Home extends Component {
   handleRandomPress = () => {
     if(this.state.activities.length > 0) {
       let randomNumberPick = Math.round(Math.random() * this.state.activities.length);
-      console.log(randomNumberPick, this.state.activities.length);
       randomNumberPick = randomNumberPick === 20 ? 1 : randomNumberPick
-      this.handleActivityPress(this.state.activities[randomNumberPick - 1]);
+      try {
+        this.handleActivityPress(this.state.activities[randomNumberPick - 1]);
+      }
+      catch {
+        this.handleRandomPress()
+      }
     } else {
       alert("Please select an activity first")
     }
@@ -109,6 +155,7 @@ export default class Home extends Component {
             initialRegion={this.state.mapRegion}
             region={this.state.mapRegion}
             animated={true}
+            showsMyLocationButton={true}
           >
           {this.state.markers.map(activity => {
             const LatLng = {
@@ -125,10 +172,10 @@ export default class Home extends Component {
         }
         {this.state.isActivityChosen ? 
         <View style={this.styles.chosenActivityContainer}>
-          <TouchableOpacity style={this.styles.exitButton}>
+          <TouchableOpacity style={this.styles.exitButton} onPress={() => this.setState({isActivityChosen: false})}>
               <Text style={this.styles.text}>X</Text>
           </TouchableOpacity>
-          <ScrollView >
+          <ScrollView style={this.styles.chosenItemDescription}>
             <Text style={this.styles.text}>{this.state.chosenActivity['name']}</Text>
             <Text style={this.styles.text}>{this.state.chosenActivity['vicinity']}</Text>
             <Text style={this.styles.text}>Rating: {this.state.chosenActivity['rating']} Stars</Text>
@@ -152,13 +199,13 @@ export default class Home extends Component {
           <TouchableOpacity style={this.styles.button} onPress={() => this.handleDineInPress()} disabled={this.state.isLoading}>
             <Text style={this.styles.text} >Dine In</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={this.styles.button} disabled={this.state.isLoading}>
+          <TouchableOpacity style={this.styles.button} onPress={() => this.handleFastFoodPress()} disabled={this.state.isLoading}>
             <Text style={this.styles.text}>Fast Food</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={this.styles.button} disabled={this.state.isLoading}>
+          <TouchableOpacity style={this.styles.button} onPress={() => this.handleShoppingPress()} disabled={this.state.isLoading}>
             <Text style={this.styles.text}>Shopping</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={this.styles.button} disabled={this.state.isLoading}>
+          <TouchableOpacity style={this.styles.button} onPress={() => this.handleOutdoorPress()} disabled={this.state.isLoading}>
             <Text style={this.styles.text}>Outdoor</Text>
           </TouchableOpacity>
         </View>
@@ -168,9 +215,11 @@ export default class Home extends Component {
         <Text style={this.styles.text}>Choose a Search Result:</Text>
         <View style={this.styles.list}>
           {this.state.activities.map(activity => {
-            return <TouchableOpacity onPress={() => this.handleActivityPress(activity)}>
+            if(activity['geometry']) {
+              return <TouchableOpacity onPress={() => this.handleActivityPress(activity)}>
               <Text style={this.styles.text} key={activity['place_id']}>{`\u2022`} {activity['name']}</Text>
             </TouchableOpacity>
+            }   
           })}
         </View>
       </ScrollView>
@@ -260,9 +309,11 @@ export default class Home extends Component {
       marginTop: '50%'
     },
     exitButton: {
+      alignSelf: 'flex-end',
       position: 'absolute',
-      top: -5,
-      right: -5,
-    }
+      zIndex: 2,
+      fontSize: 600,
+      fontWeight: '700'
+    },
   })
 }
