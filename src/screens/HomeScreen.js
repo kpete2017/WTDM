@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, ScrollView, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text, ScrollView, ActivityIndicator, Platform } from 'react-native';
 import MapView from 'react-native-maps';
 import { Marker } from 'react-native-maps';
 import customStyle from '../MapStyle';
 import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
+import getDirections from 'react-native-google-maps-directions'
 
 const url  = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?'
-
 
 export default class Home extends Component {
 
@@ -48,23 +48,23 @@ export default class Home extends Component {
       });
     } else {
       alert('Location permission not granted');
-      this.setState({isLoading: false})
+      this.setState({isLoading: false});
     }
   };
 
   handleDineInPress = () => {
     this.setState({isLoading: true})
-    const location = `location=${this.state.mapRegion['latitude']},${this.state.mapRegion['longitude']}`;
+    const location = `location=${this.state.mapRegion.latitude},${this.state.mapRegion.longitude}`;
     const radius = `&radius=${this.state.radius}`;
     const type = '&keyword=restaurant';
     const key = `&key=${this.state.key}`;
     const dineInUrl = url + location + radius + type + key;
-    this.fetchUrl(dineInUrl)
+    this.fetchUrl(dineInUrl);
   }
 
   handleFastFoodPress = () => {
     this.setState({isLoading: true})
-    const location = `location=${this.state.mapRegion['latitude']},${this.state.mapRegion['longitude']}`;
+    const location = `location=${this.state.mapRegion.latitude},${this.state.mapRegion.longitude}`;
     const radius = `&radius=${this.state.radius}`;
     const type = '&keyword=fast%20food';
     const key = `&key=${this.state.key}`;
@@ -74,7 +74,7 @@ export default class Home extends Component {
 
   handleShoppingPress = () => {
     this.setState({isLoading: true})
-    const location = `location=${this.state.mapRegion['latitude']},${this.state.mapRegion['longitude']}`;
+    const location = `location=${this.state.mapRegion.latitude},${this.state.mapRegion.longitude}`;
     const radius = `&radius=${this.state.radius}`;
     const type = '&keyword=clothing%20store';
     const key = `&key=${this.state.key}`;
@@ -84,7 +84,7 @@ export default class Home extends Component {
 
   handleOutdoorPress = () => {
     this.setState({isLoading: true})
-    const location = `location=${this.state.mapRegion['latitude']},${this.state.mapRegion['longitude']}`;
+    const location = `location=${this.state.mapRegion.latitude},${this.state.mapRegion.longitude}`;
     const radius = `&radius=${this.state.radius}`;
     const type = '&keyword=park';
     const key = `&key=${this.state.key}`;
@@ -95,21 +95,22 @@ export default class Home extends Component {
   fetchUrl = (url) => {
     fetch(url)
       .then(response => response.json())
-      .then(result => 
+      .then(result => {
         this.setState({ 
-        activities: result.results, 
-        markers: result.results, 
-        isLoading: false, 
-        chosenActivity: [] })
-      )
+          activities: result.results, 
+          markers: result.results, 
+          isLoading: false, 
+          chosenActivity: [],
+        })
+      })
       .catch( e => console.log(e))
   }
 
   handleActivityPress = (activity) => {
     this.setState({
       mapRegion: {
-        latitude: activity['geometry']['location']['lat'],
-        longitude: activity['geometry']['location']['lng']  - .0045,
+        latitude: activity.geometry.location.lat,
+        longitude: activity.geometry.location.lng  - .0045,
         latitudeDelta: 0.015,
         longitudeDelta: 0.015
       },
@@ -123,16 +124,40 @@ export default class Home extends Component {
   handleRandomPress = () => {
     if(this.state.activities.length > 0) {
       let randomNumberPick = Math.round(Math.random() * this.state.activities.length);
-      randomNumberPick = randomNumberPick === 20 ? 1 : randomNumberPick
+      randomNumberPick = randomNumberPick === 20 ? 1 : randomNumberPick;
       try {
         this.handleActivityPress(this.state.activities[randomNumberPick - 1]);
       }
       catch {
-        this.handleRandomPress()
+        this.handleRandomPress();
       }
     } else {
-      alert("Please select an activity first")
+      alert("Please select an activity first");
     }
+  }
+
+  handleDirectionsPress = () => {
+    const data = {
+      source: {
+        latitude: this.state.mapRegion.latitude,
+        longitude: this.state.mapRegion.longitude
+      },
+      destination: {
+        latitude: this.state.chosenActivity.geometry.location.lat,
+        longitude: this.state.chosenActivity.geometry.location.lng
+      },
+      params: [
+        {
+          key: "travelmode",
+          value: "driving"        // may be "walking", "bicycling" or "transit" as well
+        },
+        {
+          key: "dir_action",
+          value: "navigate"       // this instantly initializes navigation using the given travel mode
+        }
+      ]
+    }
+    getDirections(data)
   }
 
   render() {
@@ -159,12 +184,12 @@ export default class Home extends Component {
           >
           {this.state.markers.map(activity => {
             const LatLng = {
-              latitude: activity['geometry']['location']['lat'],
-              longitude: activity['geometry']['location']['lng']
+              latitude: activity.geometry.location.lat,
+              longitude: activity.geometry.location.lng
             };
             return <Marker
-            title={activity['name']}
-            key={activity['place_id']}
+            title={activity.name}
+            key={activity.place_id}
             coordinate={LatLng}
             ></Marker>
           })}
@@ -176,14 +201,14 @@ export default class Home extends Component {
               <Text style={this.styles.text}>X</Text>
           </TouchableOpacity>
           <ScrollView style={this.styles.chosenItemDescription}>
-            <Text style={this.styles.text}>{this.state.chosenActivity['name']}</Text>
-            <Text style={this.styles.text}>{this.state.chosenActivity['vicinity']}</Text>
-            <Text style={this.styles.text}>Rating: {this.state.chosenActivity['rating']} Stars</Text>
-            <Text style={this.styles.text}>Total Ratings: {this.state.chosenActivity['user_ratings_total']}</Text>
-            <Text style={this.styles.text}>Price Level: {this.state.chosenActivity['price_level']}</Text>
+            <Text style={this.styles.text}>{this.state.chosenActivity.name}</Text>
+            <Text style={this.styles.text}>{this.state.chosenActivity.vicinity}</Text>
+            <Text style={this.styles.text}>Rating: {this.state.chosenActivity.rating} Stars</Text>
+            <Text style={this.styles.text}>Total Ratings: {this.state.chosenActivity.user_rating_total}</Text>
+            <Text style={this.styles.text}>Price Level: {this.state.chosenActivity.price_level}</Text>
           </ScrollView> 
           <View style={this.styles.chosenButtonContainer}>
-            <TouchableOpacity style={this.styles.chosenButton}>
+            <TouchableOpacity style={this.styles.chosenButton} onPress={() => this.handleDirectionsPress()}>
               <Text style={this.styles.text}>Directions</Text>
             </TouchableOpacity>
             <TouchableOpacity style={this.styles.chosenButton} onPress={() => this.handleRandomPress()}>
@@ -215,9 +240,9 @@ export default class Home extends Component {
         <Text style={this.styles.text}>Choose a Search Result:</Text>
         <View style={this.styles.list}>
           {this.state.activities.map(activity => {
-            if(activity['geometry']) {
+            if(activity.geometry) {
               return <TouchableOpacity onPress={() => this.handleActivityPress(activity)}>
-              <Text style={this.styles.text} key={activity['place_id']}>{`\u2022`} {activity['name']}</Text>
+              <Text style={this.styles.text} key={activity.place_id}>{`\u2022`} {activity.name}</Text>
             </TouchableOpacity>
             }   
           })}
@@ -313,7 +338,8 @@ export default class Home extends Component {
       position: 'absolute',
       zIndex: 2,
       fontSize: 600,
-      fontWeight: '700'
+      fontWeight: '700',
+      backgroundColor: '#141418'
     },
   })
 }
