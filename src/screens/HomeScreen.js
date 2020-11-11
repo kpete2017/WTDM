@@ -53,7 +53,8 @@ export default class Home extends Component {
   };
 
   handleDineInPress = () => {
-    this.setState({isLoading: true})
+    this.setState({isLoading: true});
+    this.resetMapDelta();
     const location = `location=${this.state.mapRegion.latitude},${this.state.mapRegion.longitude}`;
     const radius = `&radius=${this.state.radius}`;
     const type = '&keyword=restaurant';
@@ -63,7 +64,8 @@ export default class Home extends Component {
   }
 
   handleFastFoodPress = () => {
-    this.setState({isLoading: true})
+    this.setState({isLoading: true});
+    this.resetMapDelta();
     const location = `location=${this.state.mapRegion.latitude},${this.state.mapRegion.longitude}`;
     const radius = `&radius=${this.state.radius}`;
     const type = '&keyword=fast%20food';
@@ -73,7 +75,8 @@ export default class Home extends Component {
   }
 
   handleShoppingPress = () => {
-    this.setState({isLoading: true})
+    this.setState({isLoading: true});
+    this.resetMapDelta();
     const location = `location=${this.state.mapRegion.latitude},${this.state.mapRegion.longitude}`;
     const radius = `&radius=${this.state.radius}`;
     const type = '&keyword=clothing%20store';
@@ -83,13 +86,25 @@ export default class Home extends Component {
   }
 
   handleOutdoorPress = () => {
-    this.setState({isLoading: true})
+    this.setState({isLoading: true});
+    this.resetMapDelta();
     const location = `location=${this.state.mapRegion.latitude},${this.state.mapRegion.longitude}`;
     const radius = `&radius=${this.state.radius}`;
     const type = '&keyword=park';
     const key = `&key=${this.state.key}`;
     const fastFoodUrl = url + location + radius + type  + key;
     this.fetchUrl(fastFoodUrl);
+  }
+
+  resetMapDelta = () => {
+    this.setState({
+      mapRegion: {
+        latitude: this.state.mapRegion.latitude,
+        longitude: this.state.mapRegion.longitude,
+        latitudeDelta: 0.055,
+        longitudeDelta: 0.055
+      }
+    })
   }
 
   fetchUrl = (url) => {
@@ -100,7 +115,6 @@ export default class Home extends Component {
           activities: result.results, 
           markers: result.results, 
           isLoading: false, 
-          chosenActivity: [],
         })
       })
       .catch( e => console.log(e))
@@ -201,10 +215,9 @@ export default class Home extends Component {
               <Text style={this.styles.text}>X</Text>
           </TouchableOpacity>
           <ScrollView style={this.styles.chosenItemDescription}>
-            <Text style={this.styles.text}>{this.state.chosenActivity.name}</Text>
+            <Text style={this.styles.textName}>{this.state.chosenActivity.name}</Text>
             <Text style={this.styles.text}>{this.state.chosenActivity.vicinity}</Text>
             <Text style={this.styles.text}>Rating: {this.state.chosenActivity.rating} Stars</Text>
-            <Text style={this.styles.text}>Total Ratings: {this.state.chosenActivity.user_rating_total}</Text>
             <Text style={this.styles.text}>Price Level: {this.state.chosenActivity.price_level}</Text>
           </ScrollView> 
           <View style={this.styles.chosenButtonContainer}>
@@ -261,6 +274,13 @@ export default class Home extends Component {
         fontSize: 15,
         padding: 12,
         fontWeight: "700"
+    },
+    textName: {
+      color: '#FFFFFF',
+      fontSize: 15,
+      padding: 12,
+      fontWeight: "700",
+      marginRight: 40
     },
     map: {
       height: 450,

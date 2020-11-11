@@ -31,9 +31,11 @@ export default function MyDrawer() {
           style: {
             backgroundColor: '#23232e',
             borderColor: '#23232e',
-            borderTopWidth: 0
+            borderTopColor: '#23232e',
+            borderTopWidth: 0,
+            borderWidth: 5
           },
-          activeTintColor: '#df49a6'
+          activeTintColor: '#df49a6',
         }}
       >
       <Tab.Screen name="Home" component={HomeScreen} />
@@ -47,8 +49,8 @@ export default function MyDrawer() {
 const styles = StyleSheet.create({
   tab: {
     width: '100%',
-    margin: 0,
-    borderColor: '#23232e'
+    borderColor: '#23232e',
+    backgroundColor: '#23232e'
   },
   text: {
     color: '#FFFFFF'
