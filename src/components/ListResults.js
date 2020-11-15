@@ -7,8 +7,8 @@ export default class ListResult extends Component {
             <View style={this.styles.list}>
             {this.props.activities.map(activity => {
                 if(activity.coordinates) {
-                return <TouchableOpacity onPress={() => this.props.handleActivityPress(activity)}>
-                <Text style={this.styles.text} key={activity.id}>{`\u2022`} {activity.name}</Text>
+                return <TouchableOpacity key={activity.id} onPress={() => this.props.handleActivityPress(activity)}>
+                <Text style={this.styles.text}>{`\u2022`} {activity.name}</Text>
                 </TouchableOpacity>
                 }   
             })}

@@ -160,7 +160,7 @@ export default class Home extends Component {
           <Text style={this.styles.text}>Choose Random</Text>
         </TouchableOpacity>
 
-        <Text style={this.styles.text}>Choose a Search Result:</Text>
+        <Text style={this.styles.text}>Or Choose a Search Result:</Text>
         <ListResults activities={this.state.activities} handleActivityPress={this.handleActivityPress}/>
       </ScrollView>
     );

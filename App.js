@@ -7,10 +7,12 @@ import { View } from 'react-native'
 
 export default function App() {
   return (
+    // Finished navigation bar for future profile and setting screens
     // <NavigationContainer>
     //   <Header />
     //   <NavigationTab />
     // </NavigationContainer>
+    
     <View>
       <Header />
       <Home />
