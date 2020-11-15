@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from '../screens/HomeScreen'
 import SettingsScreen from '../screens/SettingsScreen'
-import ProfileScreen from '../screens/ProfileScreen'
+// import ProfileScreen from '../screens/ProfileScreen'
 import { Ionicons } from '@expo/vector-icons';
 
 const Tab = createBottomTabNavigator();
@@ -17,8 +17,6 @@ export default function MyDrawer() {
 
             if (route.name === 'Home') {
               iconName = 'md-home'
-            } else if(route.name === 'Profile') {
-              iconName = 'md-person'
             } else {
               iconName = 'md-settings'
             }
@@ -39,7 +37,7 @@ export default function MyDrawer() {
         }}
       >
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      {/* <Tab.Screen name="Profile" component={ProfileScreen} />  Work in progress */}
       <Tab.Screen name="Settings" component={SettingsScreen} />
     </Tab.Navigator>
 

@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, ScrollView, ActivityIndicator, Platform } from 'react-native';
+import { View, StyleSheet, Image, TouchableOpacity, Text, ScrollView, ActivityIndicator, Platform } from 'react-native';
 import MapView from 'react-native-maps';
 import { Marker } from 'react-native-maps';
 import customStyle from '../MapStyle';
 import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
-import getDirections from 'react-native-google-maps-directions'
+import ChosenActivity from '../components/ChosenActivity'
 
-const url  = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?'
+const url  = 'https://api.yelp.com/v3/businesses/search?'
 
 export default class Home extends Component {
 
@@ -15,7 +15,7 @@ export default class Home extends Component {
     mapRegion: null,
     hasLocationPermissions: false,
     locationResult: null,
-    key: 'AIzaSyCTG8tfRBCabaCP-enskC2akmNVBvaOAAs',
+    key: 'rKNTSz5yG3Hol4ulUI_IA5AiWrrhghjyWBItID9kjO2RRCqv3hshbvB49rN-2NHgbD8MSRqC_ixLhjKRFxTaC-ryOpONaV0Y9S5Tq89Ah0h-h0sqFEMlrzo4-3WxX3Yx',
     radius: '2500',
     activities: [],
     isActivityChosen: false,
@@ -52,48 +52,17 @@ export default class Home extends Component {
     }
   };
 
-  handleDineInPress = () => {
-    this.setState({isLoading: true});
+  handleSearchPress = (activityType) => {
+    this.setState({isLoading: true, isActivityChosen: false});
     this.resetMapDelta();
-    const location = `location=${this.state.mapRegion.latitude},${this.state.mapRegion.longitude}`;
+    const latitude = `latitude=${this.state.mapRegion.latitude}`;
+    const longitude = `&longitude=${this.state.mapRegion.longitude}`;
     const radius = `&radius=${this.state.radius}`;
-    const type = '&keyword=restaurant';
-    const key = `&key=${this.state.key}`;
-    const dineInUrl = url + location + radius + type + key;
-    this.fetchUrl(dineInUrl);
-  }
-
-  handleFastFoodPress = () => {
-    this.setState({isLoading: true});
-    this.resetMapDelta();
-    const location = `location=${this.state.mapRegion.latitude},${this.state.mapRegion.longitude}`;
-    const radius = `&radius=${this.state.radius}`;
-    const type = '&keyword=fast%20food';
-    const key = `&key=${this.state.key}`;
-    const fastFoodUrl = url + location + radius + type  + key;
-    this.fetchUrl(fastFoodUrl);
-  }
-
-  handleShoppingPress = () => {
-    this.setState({isLoading: true});
-    this.resetMapDelta();
-    const location = `location=${this.state.mapRegion.latitude},${this.state.mapRegion.longitude}`;
-    const radius = `&radius=${this.state.radius}`;
-    const type = '&keyword=clothing%20store';
-    const key = `&key=${this.state.key}`;
-    const shoppingUrl = url + location + radius + type  + key;
-    this.fetchUrl(shoppingUrl);
-  }
-
-  handleOutdoorPress = () => {
-    this.setState({isLoading: true});
-    this.resetMapDelta();
-    const location = `location=${this.state.mapRegion.latitude},${this.state.mapRegion.longitude}`;
-    const radius = `&radius=${this.state.radius}`;
-    const type = '&keyword=park';
-    const key = `&key=${this.state.key}`;
-    const fastFoodUrl = url + location + radius + type  + key;
-    this.fetchUrl(fastFoodUrl);
+    const open  = `&open_now=true`
+    const term = `&term=${activityType}`;
+    const limit =  '&limit=50'
+    const finalUrl = url + latitude + longitude + radius + open + term  + limit;
+    this.fetchUrl(finalUrl);
   }
 
   resetMapDelta = () => {
@@ -108,12 +77,18 @@ export default class Home extends Component {
   }
 
   fetchUrl = (url) => {
-    fetch(url)
+    fetch(url, {
+      method: 'GET',
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${this.state.key}`
+      },
+    })
       .then(response => response.json())
       .then(result => {
         this.setState({ 
-          activities: result.results, 
-          markers: result.results, 
+          activities: result.businesses, 
+          markers: result.businesses, 
           isLoading: false, 
         })
       })
@@ -123,8 +98,8 @@ export default class Home extends Component {
   handleActivityPress = (activity) => {
     this.setState({
       mapRegion: {
-        latitude: activity.geometry.location.lat,
-        longitude: activity.geometry.location.lng  - .0045,
+        latitude: activity.coordinates.latitude,
+        longitude: activity.coordinates.longitude  - .0045,
         latitudeDelta: 0.015,
         longitudeDelta: 0.015
       },
@@ -139,39 +114,14 @@ export default class Home extends Component {
     if(this.state.activities.length > 0) {
       let randomNumberPick = Math.round(Math.random() * this.state.activities.length);
       randomNumberPick = randomNumberPick === 20 ? 1 : randomNumberPick;
-      try {
-        this.handleActivityPress(this.state.activities[randomNumberPick - 1]);
-      }
-      catch {
-        this.handleRandomPress();
-      }
+      this.handleActivityPress(this.state.activities[randomNumberPick - 1]);
     } else {
       alert("Please select an activity first");
     }
   }
 
-  handleDirectionsPress = () => {
-    const data = {
-      source: {
-        latitude: this.state.mapRegion.latitude,
-        longitude: this.state.mapRegion.longitude
-      },
-      destination: {
-        latitude: this.state.chosenActivity.geometry.location.lat,
-        longitude: this.state.chosenActivity.geometry.location.lng
-      },
-      params: [
-        {
-          key: "travelmode",
-          value: "driving"
-        },
-        {
-          key: "dir_action",
-          value: "navigate"
-        }
-      ]
-    }
-    getDirections(data)
+  handleExitButtonPress = () => {
+    this.setState({isActivityChosen: false})
   }
 
   render() {
@@ -198,52 +148,40 @@ export default class Home extends Component {
           >
           {this.state.markers.map(activity => {
             const LatLng = {
-              latitude: activity.geometry.location.lat,
-              longitude: activity.geometry.location.lng
+              latitude: activity.coordinates.latitude,
+              longitude: activity.coordinates.longitude
             };
             return <Marker
-            title={activity.name}
-            key={activity.place_id}
+            key={activity.id}
             coordinate={LatLng}
+            onPress={() => this.handleActivityPress(activity)}
+            pinColor = {"#df49a6"}
             ></Marker>
           })}
         </MapView>
         }
         {this.state.isActivityChosen ? 
-        <View style={this.styles.chosenActivityContainer}>
-          <TouchableOpacity style={this.styles.exitButton} onPress={() => this.setState({isActivityChosen: false})}>
-              <Text style={this.styles.text}>X</Text>
-          </TouchableOpacity>
-          <ScrollView style={this.styles.chosenItemDescription}>
-            <Text style={this.styles.textName}>{this.state.chosenActivity.name}</Text>
-            <Text style={this.styles.text}>{this.state.chosenActivity.vicinity}</Text>
-            <Text style={this.styles.text}>Rating: {this.state.chosenActivity.rating} Stars</Text>
-            <Text style={this.styles.text}>Price Level: {this.state.chosenActivity.price_level}</Text>
-          </ScrollView> 
-          <View style={this.styles.chosenButtonContainer}>
-            <TouchableOpacity style={this.styles.chosenButton} onPress={() => this.handleDirectionsPress()}>
-              <Text style={this.styles.text}>Directions</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={this.styles.chosenButton} onPress={() => this.handleRandomPress()}>
-              <Text style={this.styles.text}>Get Random</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-          : 
+          <ChosenActivity 
+          mapRegion={this.state.mapRegion} 
+          chosenActivity={this.state.chosenActivity} 
+          handleRandomPress={this.handleRandomPress}
+          handleExitButtonPress={this.handleExitButtonPress}
+          />
+        : 
           null
         }
         <Text style={this.styles.text}>Pick An Activity:</Text>
         <View style={this.styles.buttonContainer}>
-          <TouchableOpacity style={this.styles.button} onPress={() => this.handleDineInPress()} disabled={this.state.isLoading}>
+          <TouchableOpacity style={this.styles.button} onPress={() => this.handleSearchPress("restaurant")} disabled={this.state.isLoading}>
             <Text style={this.styles.text} >Dine In</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={this.styles.button} onPress={() => this.handleFastFoodPress()} disabled={this.state.isLoading}>
+          <TouchableOpacity style={this.styles.button} onPress={() => this.handleSearchPress("fastfood")} disabled={this.state.isLoading}>
             <Text style={this.styles.text}>Fast Food</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={this.styles.button} onPress={() => this.handleShoppingPress()} disabled={this.state.isLoading}>
+          <TouchableOpacity style={this.styles.button} onPress={() => this.handleSearchPress("shopping")} disabled={this.state.isLoading}>
             <Text style={this.styles.text}>Shopping</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={this.styles.button} onPress={() => this.handleOutdoorPress()} disabled={this.state.isLoading}>
+          <TouchableOpacity style={this.styles.button} onPress={() => this.handleSearchPress("park")} disabled={this.state.isLoading}>
             <Text style={this.styles.text}>Outdoor</Text>
           </TouchableOpacity>
         </View>
@@ -253,9 +191,9 @@ export default class Home extends Component {
         <Text style={this.styles.text}>Choose a Search Result:</Text>
         <View style={this.styles.list}>
           {this.state.activities.map(activity => {
-            if(activity.geometry) {
+            if(activity.coordinates) {
               return <TouchableOpacity onPress={() => this.handleActivityPress(activity)}>
-              <Text style={this.styles.text} key={activity.name}>{`\u2022`} {activity.name}</Text>
+              <Text style={this.styles.text} key={activity.id}>{`\u2022`} {activity.name}</Text>
             </TouchableOpacity>
             }   
           })}
@@ -267,20 +205,13 @@ export default class Home extends Component {
   styles = StyleSheet.create({ 
     container: {
         backgroundColor: '#141418',
-        height: 'auto'
+        height: '100%'
     },
     text: {
         color: '#FFFFFF',
         fontSize: 15,
         padding: 12,
         fontWeight: "700"
-    },
-    textName: {
-      color: '#FFFFFF',
-      fontSize: 15,
-      padding: 12,
-      fontWeight: "700",
-      marginRight: 40
     },
     map: {
       height: 450,
@@ -305,7 +236,7 @@ export default class Home extends Component {
       alignSelf: 'center',
       backgroundColor: '#23232e',
       borderRadius: 5,
-      marginBottom: 10
+      marginBottom: 10,
     },
     randomButton: {
       backgroundColor: '#23232e',
@@ -313,36 +244,6 @@ export default class Home extends Component {
       alignSelf: 'center',
       alignItems: 'center',
       borderRadius: 5,
-    },
-    activityContainer: {
-      backgroundColor: '#23232e',
-      width: '50%',
-      height: 430,
-      zIndex: 1,
-      position: 'absolute',
-      top: 10,
-      left: 5
-    },
-    chosenActivityContainer: {
-      backgroundColor: '#23232e',
-      width: '50%',
-      height: 350,
-      zIndex: 1,
-      position: 'absolute',
-      top: 10,
-      left: 5,
-      borderRadius: 5
-    },
-    chosenButton: {
-      backgroundColor: '#141418',
-      borderRadius: 5,
-      marginLeft: 7,
-      marginRight: 7,
-      marginTop: 5
-    },
-    chosenButtonContainer: {
-      marginTop: 10,
-      marginBottom: 10
     },
     loadingContainer: {
       height: 450,
@@ -352,14 +253,6 @@ export default class Home extends Component {
     },
     activityIndicator: {
       marginTop: '50%'
-    },
-    exitButton: {
-      alignSelf: 'flex-end',
-      position: 'absolute',
-      zIndex: 2,
-      fontSize: 600,
-      fontWeight: '700',
-      backgroundColor: '#141418'
-    },
+    }
   })
 }

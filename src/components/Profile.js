@@ -1,7 +1,6 @@
 import { StyleSheet, Text, Keyboard, View, TextInput, TouchableOpacity, FlatList, ScrollView} from 'react-native';
 import React, { Component } from 'react';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
-import { AsyncStorage } from 'react-native';
 
 export default class Profile extends Component {
 

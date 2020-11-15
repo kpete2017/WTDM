@@ -11,7 +11,7 @@ export default function Header() {
 
 const styles = StyleSheet.create({
     header: {
-        height: '12%',
+        height: '10%',
         backgroundColor: '#23232e'
 
     },
@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
         alignSelf: "flex-start",
         textAlign: "center",
         fontSize: 25,
-        marginTop: '15%',
+        marginTop: '12%',
         marginLeft: 15,
         color: '#FFFFFF'
     }
