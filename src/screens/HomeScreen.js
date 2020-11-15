@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, Image, TouchableOpacity, Text, ScrollView, ActivityIndicator, Platform } from 'react-native';
+import { View, StyleSheet, Image, TouchableOpacity, Text, ScrollView, ActivityIndicator } from 'react-native';
 import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
-import ChosenActivity from '../components/ChosenActivity'
-import Map from '../components/Map'
+import ChosenActivity from '../components/ChosenActivity';
+import Map from '../components/Map';
+import ActivityButtons from '../components/ActivityButtons';
+import ListResults from '../components/ListResults';
 
 const url  = 'https://api.yelp.com/v3/businesses/search?'
 
@@ -40,7 +42,6 @@ export default class Home extends Component {
           longitude: location.coords.longitude,
           latitudeDelta: 0.035,
           longitudeDelta: 0.035,
-          
         },
         isLoading: false
       });
@@ -126,8 +127,7 @@ export default class Home extends Component {
     return (
       <ScrollView style={this.styles.container} ref={(c) => {this.scroll = c}}>
 
-        {this.state.isLoading === true
-        ? 
+        {this.state.isLoading === true ? 
           <View style={this.styles.loadingContainer}>
             <ActivityIndicator style={this.styles.activityIndicator} size="large"/>
           </View> 
@@ -139,8 +139,7 @@ export default class Home extends Component {
           />
         }
         
-        {this.state.isActivityChosen 
-        ? 
+        {this.state.isActivityChosen ? 
           <ChosenActivity 
           mapRegion={this.state.mapRegion} 
           chosenActivity={this.state.chosenActivity} 
@@ -150,35 +149,19 @@ export default class Home extends Component {
         : 
           null
         }
-        
+
         <Text style={this.styles.text}>Pick An Activity:</Text>
-        <View style={this.styles.buttonContainer}>
-          <TouchableOpacity style={this.styles.button} onPress={() => this.handleSearchPress("restaurant")} disabled={this.state.isLoading}>
-            <Text style={this.styles.text} >Dine In</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={this.styles.button} onPress={() => this.handleSearchPress("fastfood")} disabled={this.state.isLoading}>
-            <Text style={this.styles.text}>Fast Food</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={this.styles.button} onPress={() => this.handleSearchPress("shopping")} disabled={this.state.isLoading}>
-            <Text style={this.styles.text}>Shopping</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={this.styles.button} onPress={() => this.handleSearchPress("park")} disabled={this.state.isLoading}>
-            <Text style={this.styles.text}>Outdoor</Text>
-          </TouchableOpacity>
-        </View>
+        <ActivityButtons 
+          isLoading={this.state.isLoading} 
+          handleSearchPress={this.handleSearchPress}
+        />
+
         <TouchableOpacity style={this.styles.randomButton} onPress={() => this.handleRandomPress()} disabled={this.state.isLoading}>
           <Text style={this.styles.text}>Choose Random</Text>
         </TouchableOpacity>
+
         <Text style={this.styles.text}>Choose a Search Result:</Text>
-        <View style={this.styles.list}>
-          {this.state.activities.map(activity => {
-            if(activity.coordinates) {
-              return <TouchableOpacity onPress={() => this.handleActivityPress(activity)}>
-              <Text style={this.styles.text} key={activity.id}>{`\u2022`} {activity.name}</Text>
-            </TouchableOpacity>
-            }   
-          })}
-        </View>
+        <ListResults activities={this.state.activities} handleActivityPress={this.handleActivityPress}/>
       </ScrollView>
     );
   }
@@ -193,26 +176,6 @@ export default class Home extends Component {
         fontSize: 15,
         padding: 12,
         fontWeight: "700"
-    },
-    buttonContainer: {
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignSelf: 'center',
-      width: '95%',
-      marginBottom: 10    
-    },
-    button: {
-      backgroundColor: '#23232e',
-      borderRadius: 5
-    },
-    list: {
-      width: '95%',
-      height: 'auto',
-      alignSelf: 'center',
-      backgroundColor: '#23232e',
-      borderRadius: 5,
-      marginBottom: 10,
     },
     randomButton: {
       backgroundColor: '#23232e',
