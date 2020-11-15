@@ -163,11 +163,11 @@ export default class Home extends Component {
       params: [
         {
           key: "travelmode",
-          value: "driving"        // may be "walking", "bicycling" or "transit" as well
+          value: "driving"
         },
         {
           key: "dir_action",
-          value: "navigate"       // this instantly initializes navigation using the given travel mode
+          value: "navigate"
         }
       ]
     }
@@ -255,7 +255,7 @@ export default class Home extends Component {
           {this.state.activities.map(activity => {
             if(activity.geometry) {
               return <TouchableOpacity onPress={() => this.handleActivityPress(activity)}>
-              <Text style={this.styles.text} key={activity.place_id}>{`\u2022`} {activity.name}</Text>
+              <Text style={this.styles.text} key={activity.name}>{`\u2022`} {activity.name}</Text>
             </TouchableOpacity>
             }   
           })}
