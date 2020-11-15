@@ -1,4 +1,4 @@
-# What To Do?
+# What To Do Mobile
 ![Image of Home](https://i.imgur.com/QkB4Hlg.png)
 
 ## Live-Site
