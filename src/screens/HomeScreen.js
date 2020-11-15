@@ -1,11 +1,9 @@
 import React, { Component } from 'react';
 import { View, StyleSheet, Image, TouchableOpacity, Text, ScrollView, ActivityIndicator, Platform } from 'react-native';
-import MapView from 'react-native-maps';
-import { Marker } from 'react-native-maps';
-import customStyle from '../MapStyle';
 import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
 import ChosenActivity from '../components/ChosenActivity'
+import Map from '../components/Map'
 
 const url  = 'https://api.yelp.com/v3/businesses/search?'
 
@@ -126,41 +124,23 @@ export default class Home extends Component {
 
   render() {
     return (
-      <ScrollView 
-        style={this.styles.container}
-        ref={(c) => {this.scroll = c}}
-      >
+      <ScrollView style={this.styles.container} ref={(c) => {this.scroll = c}}>
+
         {this.state.isLoading === true
         ? 
-        <View style={this.styles.loadingContainer}>
-          <ActivityIndicator style={this.styles.activityIndicator} size="large"/>
-        </View> 
+          <View style={this.styles.loadingContainer}>
+            <ActivityIndicator style={this.styles.activityIndicator} size="large"/>
+          </View> 
         :
-        <MapView
-            showsUserLocation={true}
-            customMapStyle={customStyle}
-            style={this.styles.map}
-            provider={MapView.PROVIDER_GOOGLE}
-            initialRegion={this.state.mapRegion}
-            region={this.state.mapRegion}
-            animated={true}
-            showsMyLocationButton={true}
-          >
-          {this.state.markers.map(activity => {
-            const LatLng = {
-              latitude: activity.coordinates.latitude,
-              longitude: activity.coordinates.longitude
-            };
-            return <Marker
-            key={activity.id}
-            coordinate={LatLng}
-            onPress={() => this.handleActivityPress(activity)}
-            pinColor = {"#df49a6"}
-            ></Marker>
-          })}
-        </MapView>
+          <Map  
+          mapRegion={this.state.mapRegion}
+          markers={this.state.markers}
+          handleActivityPress={this.handleActivityPress}
+          />
         }
-        {this.state.isActivityChosen ? 
+        
+        {this.state.isActivityChosen 
+        ? 
           <ChosenActivity 
           mapRegion={this.state.mapRegion} 
           chosenActivity={this.state.chosenActivity} 
@@ -170,6 +150,7 @@ export default class Home extends Component {
         : 
           null
         }
+        
         <Text style={this.styles.text}>Pick An Activity:</Text>
         <View style={this.styles.buttonContainer}>
           <TouchableOpacity style={this.styles.button} onPress={() => this.handleSearchPress("restaurant")} disabled={this.state.isLoading}>
@@ -212,11 +193,6 @@ export default class Home extends Component {
         fontSize: 15,
         padding: 12,
         fontWeight: "700"
-    },
-    map: {
-      height: 450,
-      width: '100%',
-      zIndex: -1,
     },
     buttonContainer: {
       display: 'flex',

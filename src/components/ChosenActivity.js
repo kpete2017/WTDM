@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { View, StyleSheet, Image, TouchableOpacity, Text, ScrollView, ActivityIndicator, Platform } from 'react-native';
-import getDirections from 'react-native-google-maps-directions'
+import getDirections from 'react-native-google-maps-directions';
 
 export default class ChosenActivity extends Component {
 
@@ -24,8 +24,8 @@ export default class ChosenActivity extends Component {
               value: "navigate"
             }
           ]
-        }
-        getDirections(data)
+        };
+        getDirections(data);
     }
 
     render() {
