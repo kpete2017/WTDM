@@ -3,8 +3,10 @@ Home Page with Markers            |  Home Page With Activity Chosen | Custom Sea
 :-------------------------:|:-------------------------:|:-------------------------:
 ![](https://i.imgur.com/AXbRlKN.png)  |  ![](https://i.imgur.com/5bcP5RD.png) | ![](https://i.imgur.com/J7jqxr6.png)
 
-## Live-Site
-https://what-to-do-7d9ec.firebaseapp.com/
+## Attention:
+This is specifically the mobile version of the project.
+
+You can reach the live version of the web application at https://what-to-do-7d9ec.firebaseapp.com/ or you can reach the GitHub of the web application Frontend and Backend at https://github.com/kpete2017/What_To_Do
 
 <!-- TABLE OF CONTENTS -->
 ## Table of Contents
@@ -14,8 +16,6 @@ https://what-to-do-7d9ec.firebaseapp.com/
 * [Getting Started](#getting-started)
 * [Usage](#usage)
 * [Contact](#contact)
-* [Acknowledgements](#acknowledgements)
-
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
