@@ -191,7 +191,7 @@ export default class Home extends Component {
   styles = StyleSheet.create({ 
     container: {
         backgroundColor: '#141418',
-        height: '100%'
+        height: '100%',
     },
     text: {
         color: '#FFFFFF',

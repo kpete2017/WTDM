@@ -29,7 +29,7 @@ export default class ListResult extends Component {
           alignSelf: 'center',
           backgroundColor: '#23232e',
           borderRadius: 5,
-          marginBottom: 10,
+          marginBottom: 200
         },
     })
 }
