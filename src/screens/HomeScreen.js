@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, Image, TouchableOpacity, Text, ScrollView, ActivityIndicator, TextInput, Keyboard, KeyboardAvoidingView } from 'react-native';
+import { View, StyleSheet, Image, TouchableOpacity, Text, ScrollView, ActivityIndicator, TextInput, SafeAreaView, KeyboardAvoidingView } from 'react-native';
 import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
 import ChosenActivity from '../components/ChosenActivity';
 import Map from '../components/Map';
 import ActivityButtons from '../components/ActivityButtons';
 import ListResults from '../components/ListResults';
+
 
 const url  = 'https://api.yelp.com/v3/businesses/search?'
 
@@ -137,7 +138,8 @@ export default class Home extends Component {
 
   render() {
     return (
-      <KeyboardAvoidingView behavior={Platform.OS == "ios" ? "padding" : "height"}>
+      <SafeAreaView>
+      <KeyboardAvoidingView behavior={Platform.OS == "ios" ? "padding" : "position"} keyboardVerticalOffset={Platform.select({ios: 120, android: -300})} style={{backgroundColor: '#141418'}}>
         <ScrollView style={this.styles.container} ref={(c) => {this.scroll = c}} nestedScrollEnabled = {true}>
           {this.state.isLoading === true ? 
             <View style={this.styles.loadingContainer}>
@@ -168,7 +170,7 @@ export default class Home extends Component {
           />
 
           <Text style={this.styles.subText}>Search Custom Activity</Text>
-          <View style={this.styles.customContainer}>
+          <View style={{display: "flex", flexDirection: "row", width: "95%", justifyContent: "center", alignSelf: "center", marginBottom: 20}}>
             <TextInput onChangeText={text => this.setState({customSearch: text})} placeholder="Custom Activity"  placeholderColor="#FFFFFF" style={this.styles.customInput}/>
             <TouchableOpacity onPress={() => this.handleCustomSearch()}>
                 <Text style={this.styles.button}>Search</Text>
@@ -182,6 +184,7 @@ export default class Home extends Component {
           <ListResults activities={this.state.activities} handleActivityPress={this.handleActivityPress}/>
         </ScrollView>
       </KeyboardAvoidingView>
+      </SafeAreaView>
     );
   }
 
@@ -216,13 +219,6 @@ export default class Home extends Component {
       color: 'black',
       backgroundColor: '#fafafa',
       width: "80%"
-    },
-    customContainer: {
-      display: 'flex',
-      flexDirection: 'row',
-      width: '95%%',
-      alignSelf: 'center',
-      marginBottom: 20
     },
     button: {
       color: '#FFFFFF',

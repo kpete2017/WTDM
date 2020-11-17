@@ -8,7 +8,7 @@ https://what-to-do-7d9ec.firebaseapp.com/
 ## Table of Contents
 
 * [About the Project](#about-the-project)
-  * [Built With](#built-with)
+* [Built With](#built-with)
 * [Getting Started](#getting-started)
 * [Usage](#usage)
 * [Contact](#contact)

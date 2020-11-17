@@ -111,7 +111,6 @@ export default class ChosenActivity extends Component {
         },
         chosenItemDescription: {
           flexGrow: 1,
-          zIndex: 2
         }
       })
 }
