@@ -36,7 +36,7 @@ export default class ChosenActivity extends Component {
               <Text style={this.styles.text}>X</Text>
           </TouchableOpacity>
 
-          <ScrollView style={this.styles.chosenItemDescription} persistentScrollbar={true}>
+          <ScrollView style={this.styles.chosenItemDescription} persistentScrollbar={true} nestedScrollEnabled={true}>
             <Text style={this.styles.textName}>{this.props.chosenActivity.name}</Text>
             <Image style={this.styles.image} source={{uri: this.props.chosenActivity.image_url}} />
             <Text style={this.styles.text}>{this.props.chosenActivity.location.address1} 
@@ -108,6 +108,10 @@ export default class ChosenActivity extends Component {
           height: 100,
           width: "85%",
           alignSelf: "center"
+        },
+        chosenItemDescription: {
+          flexGrow: 1,
+          zIndex: 2
         }
       })
 }

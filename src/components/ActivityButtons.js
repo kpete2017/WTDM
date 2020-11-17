@@ -9,7 +9,7 @@ export default class ActivityButtons extends Component {
                 <TouchableOpacity style={this.styles.button} onPress={() => this.props.handleSearchPress("restaurant")} disabled={this.props.isLoading}>
                     <Text style={this.styles.text} >Dine In</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={this.styles.button} onPress={() => this.props.handleSearchPress("fastfood")} disabled={this.props.isLoading}>
+                <TouchableOpacity style={this.styles.button} onPress={() => this.props.handleSearchPress("fast-food")} disabled={this.props.isLoading}>
                     <Text style={this.styles.text}>Fast Food</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={this.styles.button} onPress={() => this.props.handleSearchPress("shopping")} disabled={this.props.isLoading}>

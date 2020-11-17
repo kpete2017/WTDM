@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, Image, TouchableOpacity, Text, ScrollView, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, Image, TouchableOpacity, Text, ScrollView, ActivityIndicator, TextInput, Keyboard, KeyboardAvoidingView } from 'react-native';
 import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
 import ChosenActivity from '../components/ChosenActivity';
@@ -16,12 +16,13 @@ export default class Home extends Component {
     hasLocationPermissions: false,
     locationResult: null,
     key: 'rKNTSz5yG3Hol4ulUI_IA5AiWrrhghjyWBItID9kjO2RRCqv3hshbvB49rN-2NHgbD8MSRqC_ixLhjKRFxTaC-ryOpONaV0Y9S5Tq89Ah0h-h0sqFEMlrzo4-3WxX3Yx',
-    radius: '2500',
+    radius: '5000',
     activities: [],
     isActivityChosen: false,
     chosenActivity: [],
     markers: [],
-    isLoading: false
+    isLoading: false,
+    customSearch: ""
   };
 
   componentDidMount() {
@@ -46,7 +47,7 @@ export default class Home extends Component {
         isLoading: false
       });
     } else {
-      alert('Location permission not granted');
+      alert('Please grant location permission');
       this.setState({isLoading: false});
     }
   };
@@ -113,56 +114,74 @@ export default class Home extends Component {
     if(this.state.activities.length > 0) {
       let randomNumberPick = Math.round(Math.random() * this.state.activities.length);
       randomNumberPick = randomNumberPick === 20 ? 1 : randomNumberPick;
-      this.handleActivityPress(this.state.activities[randomNumberPick - 1]);
+      try {
+        this.handleActivityPress(this.state.activities[randomNumberPick - 1]);
+      }
+      catch(e) {
+        this.handleRandomPress();
+      }
     } else {
       alert("Please select an activity first");
     }
   }
 
   handleExitButtonPress = () => {
-    this.setState({isActivityChosen: false})
+    this.setState({isActivityChosen: false});
+  }
+
+  handleCustomSearch = () => {
+    let str = this.state.customSearch;
+    str = str.toLowerCase().replace(/\s/g, '');
+    this.handleSearchPress(str);
   }
 
   render() {
     return (
-      <ScrollView style={this.styles.container} ref={(c) => {this.scroll = c}}>
+      <KeyboardAvoidingView behavior={Platform.OS == "ios" ? "padding" : "height"}>
+        <ScrollView style={this.styles.container} ref={(c) => {this.scroll = c}} nestedScrollEnabled = {true}>
+          {this.state.isLoading === true ? 
+            <View style={this.styles.loadingContainer}>
+              <ActivityIndicator style={this.styles.activityIndicator} size="large" animating={true}/>
+            </View> 
+          :
+            <Map  
+            mapRegion={this.state.mapRegion}
+            markers={this.state.markers}
+            handleActivityPress={this.handleActivityPress}
+            />
+          }
+          {this.state.isActivityChosen ? 
+            <ChosenActivity 
+            mapRegion={this.state.mapRegion} 
+            chosenActivity={this.state.chosenActivity} 
+            handleRandomPress={this.handleRandomPress}
+            handleExitButtonPress={this.handleExitButtonPress}
+            />
+          : 
+            null
+          }
 
-        {this.state.isLoading === true ? 
-          <View style={this.styles.loadingContainer}>
-            <ActivityIndicator style={this.styles.activityIndicator} size="large"/>
-          </View> 
-        :
-          <Map  
-          mapRegion={this.state.mapRegion}
-          markers={this.state.markers}
-          handleActivityPress={this.handleActivityPress}
+          <Text style={this.styles.text}>Pick An Activity:</Text>
+          <ActivityButtons 
+            isLoading={this.state.isLoading} 
+            handleSearchPress={this.handleSearchPress}
           />
-        }
-        
-        {this.state.isActivityChosen ? 
-          <ChosenActivity 
-          mapRegion={this.state.mapRegion} 
-          chosenActivity={this.state.chosenActivity} 
-          handleRandomPress={this.handleRandomPress}
-          handleExitButtonPress={this.handleExitButtonPress}
-          />
-        : 
-          null
-        }
 
-        <Text style={this.styles.text}>Pick An Activity:</Text>
-        <ActivityButtons 
-          isLoading={this.state.isLoading} 
-          handleSearchPress={this.handleSearchPress}
-        />
-
-        <TouchableOpacity style={this.styles.randomButton} onPress={() => this.handleRandomPress()} disabled={this.state.isLoading}>
-          <Text style={this.styles.text}>Choose Random</Text>
-        </TouchableOpacity>
-
-        <Text style={this.styles.text}>Or Choose a Search Result:</Text>
-        <ListResults activities={this.state.activities} handleActivityPress={this.handleActivityPress}/>
-      </ScrollView>
+          <Text style={this.styles.subText}>Search Custom Activity</Text>
+          <View style={this.styles.customContainer}>
+            <TextInput onChangeText={text => this.setState({customSearch: text})} placeholder="Custom Activity"  placeholderColor="#FFFFFF" style={this.styles.customInput}/>
+            <TouchableOpacity onPress={() => this.handleCustomSearch()}>
+                <Text style={this.styles.button}>Search</Text>
+            </TouchableOpacity>
+          </View>
+          
+          <TouchableOpacity style={this.styles.randomButton} onPress={() => this.handleRandomPress()} disabled={this.state.isLoading}>
+            <Text style={this.styles.text}>Choose Random</Text>
+          </TouchableOpacity>
+          <Text style={this.styles.text}>Or Choose a Search Result:</Text>
+          <ListResults activities={this.state.activities} handleActivityPress={this.handleActivityPress}/>
+        </ScrollView>
+      </KeyboardAvoidingView>
     );
   }
 
@@ -192,6 +211,32 @@ export default class Home extends Component {
     },
     activityIndicator: {
       marginTop: '50%'
+    },
+    customInput: {
+      color: 'black',
+      backgroundColor: '#fafafa',
+      width: "80%"
+    },
+    customContainer: {
+      display: 'flex',
+      flexDirection: 'row',
+      width: '95%%',
+      alignSelf: 'center',
+      marginBottom: 20
+    },
+    button: {
+      color: '#FFFFFF',
+      backgroundColor: '#23232e',
+      padding: 12,
+      fontSize: 15,
+      fontWeight: "700",
+    },
+    subText: {
+      color: '#FFFFFF',
+        fontSize: 15,
+        padding: 5,
+        paddingLeft: 12,
+        fontWeight: "700"
     }
   })
 }

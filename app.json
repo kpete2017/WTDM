@@ -24,6 +24,8 @@
     },
     "extra": {
       "mysecret": "AIzaSyCTG8tfRBCabaCP-enskC2akmNVBvaOAAs"
-    }
+    },
+    "description": "Fun little side project made to help find a random activity for the day based on a catagory.",
+    "githubUrl": "https://github.com/kpete2017/what_to_do_mobile"
   }
 }
