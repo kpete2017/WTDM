@@ -52,7 +52,7 @@ In order to run the mobile version of this project locally you will need [Node.j
 
 4. run `yarn start`
 
-5. Then throgh the expo window, run the app on any choice of physical device or emulator
+5. Then through the expo window, run the app on any choice of physical device or emulator
 
 ## Usage
 
